@@ -186,22 +186,47 @@ if (document.getElementById("trackGrid")) {
   }
   
 
-  window.addEventListener('DOMContentLoaded', () => {
-    initAudioPlayer();
-  });
-  
-  
-  
-  window.addEventListener('resize', autoSizeHeadings);
-  
-  gsap.registerPlugin(SplitText);
-  
+  function initPreorderScramble() {
+    const preorderLink = document.querySelector('.preorder-link');
+
+    if (preorderLink) {
+      const originalText = preorderLink.textContent;
+
+
+      gsap.from(preorderLink, {
+        duration: 0.8,
+        scrambleText: {
+          text: " ",
+          chars: "XO!#@*",
+          speed: 0.3,
+        },
+        ease: "power2.out",
+      });
+
+      preorderLink.addEventListener('mouseenter', () => {
+        gsap.to(preorderLink, {
+          duration: 0.5,
+          scrambleText: {
+            text: originalText,
+            chars: "XO!#@*",
+            speed: 0.5,
+          },
+          ease: "power1.inOut",
+        });
+      });
+
+      preorderLink.addEventListener('mouseleave', () => {
+        gsap.to(preorderLink, { duration: 0.5, scrambleText: { text: originalText, chars: "XO!#@*" }, ease: "power1.inOut" });
+      });
+    }
+  }
+
   function initHeadlineSplit() {
     const splitted = SplitText.create('.heading-line', {
       type: 'chars',
       preserveSpaces: true
     });
-  
+
     splitted.chars.forEach((char) => {
       char.addEventListener('mouseenter', () => {
         gsap.to(char, {
@@ -221,7 +246,7 @@ if (document.getElementById("trackGrid")) {
         });
       });
     });
-  
+
     //kerning for specific pairs in Faction
     splitted.chars.forEach((char, i) => {
       const current = char.textContent || '';
@@ -246,14 +271,27 @@ if (document.getElementById("trackGrid")) {
       }
     });
   }
-  
+
   window.addEventListener('DOMContentLoaded', () => {
+    initAudioPlayer();
+    initPreorderScramble();
+
     document.fonts.ready.then(() => {
-    initHeadlineSplit();
-    setTimeout(() => {
-      autoSizeHeadings();
-      forceLayoutReflow();
-    }, 100);
-  
+      initHeadlineSplit();
+      setTimeout(() => {
+        autoSizeHeadings();
+        forceLayoutReflow();
+      }, 100);
     });
   });
+
+  window.addEventListener('resize', autoSizeHeadings);
+
+  barba.init();
+
+  barba.hooks.after(() => {
+    initAudioPlayer();
+    initPreorderScramble();
+  });
+
+  gsap.registerPlugin(SplitText, ScrambleTextPlugin);
